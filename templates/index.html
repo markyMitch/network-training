@@ -6,6 +6,7 @@
 
     <title>Network builder</title>
     <link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/css/model.css"/>
 </head>
 <body>
     <div class="container-fluid">
@@ -16,7 +17,23 @@
             <h3>Loading content...</h3>
         </div>
         <div class="action-pane">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Console output</h5>
+                    <textarea id="log" rows="10" cols="50" readonly="true">
 
+
+                    </textarea>
+
+                </div>
+                <div class="col-md-6">
+                    <div id="context-menu">
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
         <div class="challenge">
@@ -28,6 +45,9 @@
         </div>
 
     </div>
-<script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/model.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+
 </body>
 </html>

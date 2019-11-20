@@ -1,0 +1,35 @@
+.network-pane {
+	border: 1px solid black;
+}
+
+.network-node {
+	border: 1px solid black;
+	margin: 5px;
+}
+
+.clicked-node {
+	border: 5px solid red;
+	margin: 5px;
+}
+
+img {
+	height: 80px;
+}
+
+.action-pane {
+	border: 1px solid black;
+}
+
+#context-menu {
+	border: 1px solid black;
+	padding: 5px;
+	height: 100%;
+}
+
+.btn {
+	margin: 5px;
+}
+
+.inline-heading {
+	display: inline;
+}
