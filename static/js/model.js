@@ -15,6 +15,7 @@ class NetworkNode {
     ipconfig() {
     	var startline = 'Windows IP Configuration\n\n';
     	var adapterline = 'Ethernet Adapter Ethernet:\n\n';
+    	var MACline = 'Physical Address...........' + this.MAC + '\n';
     	var ipline = '';
     	var subnetline = '';
     	var gatewayline = '';
@@ -37,15 +38,19 @@ class NetworkNode {
     		gatewayline = 'Default gateway..............' + this.default_gateway + '\n';
     	}
 
-    	return startline + adapterline + ipline + subnetline + gatewayline;
+    	return startline + adapterline + MACline + ipline + subnetline + gatewayline;
     	
     }
 
 
     renew_dhcp() {
     	if(this.neighbour) {
-    		console.log('sending info');
-    		this.neighbour.handle_message('renew_dchp', this.ip, '', null); //not getting sent to router
+    		this.write_info('Sending DHCP Request over network');
+    		this.load_log();
+    		this.neighbour.handle_message('renew_dhcp', this.MAC, '', null); //not getting sent to router
+    	} else {
+    		this.write_info('Error: need to be connected to a network to send DHCP request');
+    		this.load_log();
     	}
     }
 
@@ -108,7 +113,7 @@ class NetworkNode {
     }
 
     generate_menu() {
-    	let html = "";
+    	let html = ""; 
 
     	//provide buttons for available actions
     	html += "<h3>Available commands:</h3>"
@@ -138,8 +143,8 @@ class NetworkNode {
 class Desktop extends NetworkNode {
 	
 
-	constructor(name) {
-		super(name);
+	constructor(name, MAC) {
+		super(name, MAC);
 		this.image = 'desktop.jpg';
 	}
 
@@ -191,31 +196,52 @@ class Router extends NetworkNode {
 
 
 	handle_message(message, sender, destination, content=null) {
+		console.log(message);
 		if(message == 'renew_dhcp') {
-			console.log('Handling renew dhcp request');
+			
 			let parts = this.dhcp_start.split('.');
 			let last = parseInt(parts[3]) + this.dhcp_counter;
 			this.dhcp_counter++;
 			let assigned_address = parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + last;
-			let return_info = [assigned_address, this.subnet_mask, this.default_gateway];
+			let return_info = [assigned_address, this.subnet_mask, this.ip];
 
 			if(sender.split('.').length != 4) {
 				//sent with MAC
 				for(let i = 0; i < this.neighbours.length; i++) {
-					if(neighbours[i].MAC == sender) {
-						neighbours[i].handle_message('dhcp_info', this.ip, sender, return_info);
+					if(this.neighbours[i].MAC == sender) {
+						this.neighbours[i].handle_message('dhcp_info', this.ip, sender, return_info);
 					}
 				}
 			} else {
 				//sent with IP
 				for(let i = 0; i < this.neighbours.length; i++) {
-					if(neighbours[i].IP == sender) {
-						neighbours[i].handle_message('dhcp_info', this.ip, sender, return_info);
+					if(this.neighbours[i].IP == sender) {
+						this.neighbours[i].handle_message('dhcp_info', this.ip, sender, return_info);
 					}
 				}
 			}
 		}
 	}
+
+	 generate_menu() {
+    	let html = ""; 
+
+    	//provide buttons for available actions
+    	html += "<h3>Available commands:</h3>"
+    	html += "<button id='ipconfig-button' class='btn btn-primary' type='button'>IP Config</button><br/>";
+    	
+    	return html;
+    }
+
+    hook_menu() {
+    	//hook own generated menu buttons
+    	let self = this; //obj reference for in callback
+    	$('#ipconfig-button').click(function() {
+    		self.write_info(self.ipconfig());
+    		self.load_log();
+    	});
+    	
+    }
 }
 
 class Model {
@@ -358,13 +384,26 @@ class Model {
 	}
 }
 
-function setup_task_one() {
+function setup_test() {
 	model = new Model();
-	pc = new Desktop('Bob\'s PC', 'AABBCC');
-	router = new Router('Bob\'s router', 'DDEEFF', '1.2.3.4', '255.255.255.0');
+	pc = new Desktop('Bob\'s PC', 'A2:34:6C:AB:BC:CA');
+	router = new Router('Bob\'s router', '25:DD:6B:4B:94:FB', '1.2.3.4', '255.255.255.0');
 	model.add_node(pc);
 	model.add_node(router);
 	model.render_nodes();
 	model.hook_nodes();
 	model.render_menu();
 }
+
+function task_one() {
+	model = new Model();
+	pc = new Desktop('Bob\'s PC', '00:00:0C:FD:B7:CA');
+	pc.ip = '192.168.0.2';
+	pc.subnet_mask = '255.255.255.0';
+	pc.default_gateway = '192.168.0.1';
+	model.add_node(pc);
+	model.render_nodes();
+	model.hook_nodes();
+	model.render_menu();
+}
+

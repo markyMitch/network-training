@@ -1,3 +1,7 @@
+.header-row {
+	background-color: cyan;
+}
+
 .network-pane {
 	border: 1px solid black;
 }
@@ -32,4 +36,12 @@ img {
 
 .inline-heading {
 	display: inline;
+}
+
+.challenge {
+	margin: 5px;
+}
+
+input {
+	margin: 5px;
 }
