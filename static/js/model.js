@@ -54,6 +54,47 @@ class NetworkNode {
     	}
     }
 
+    static_ip(ip,subnet_mask, default_gateway) {
+    	//check ip
+    	if(!this.check_ip(ip)) {
+    		this.write_info('Error: invalid ip');
+    		this.load_log();
+    		return;
+    	}
+    	if(!this.check_ip(subnet_mask)) {
+    		this.write_info('Error: invalid subnet mask');
+    		this.load_log();
+    		return;
+    	}
+    	if(!this.check_ip(default_gateway)) {
+    		this.write_info('Error: invalid defaut gateway');
+    		this.load_log();
+    		return;
+    	}
+    	this.ip = ip;
+    	this.subnet_mask = subnet_mask;
+    	this.default_gateway = default_gateway;
+    	this.write_info('Static IP updated');
+    	this.load_log();
+
+
+    	//check subnet mask
+    }
+
+    check_ip(ip) {
+    	let parts = ip.split('.');
+    	if(parts.length != 4) {
+    		return false;
+    	}
+    	for(let i = 0; i < parts.length; i++) {
+    		let part_int = parseInt(parts[i]);
+    		if(part_int == NaN || part_int < 0 || part_int > 255) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+
     connect(node) {
     	if(this.neighbour) {
     		if(this.neighbour == node) {
@@ -119,7 +160,7 @@ class NetworkNode {
     	html += "<h3>Available commands:</h3>"
     	html += "<button id='ipconfig-button' class='btn btn-primary' type='button'>IP Config</button><br/>";
     	html += "<button id='renew-button' class='btn btn-primary' type='button'>Renew DHCP</button><br/>";
-    	
+    	html += "<button id='static-button' class='btn btn-primary' type='button'>Set static IP</button><br/>";
     	return html;
     }
 
@@ -134,9 +175,30 @@ class NetworkNode {
     		self.renew_dhcp();
     		self.load_log();
     	});
+    	$('#static-button').click(function() {
+    		let html = '<h5>Set static IP Adressing</h5><h5 class="inline-heading">IP Address</h5><input type="text" id="static_ip"/><br/>';
+    		html += '<h5 class="inline-heading">Subnet Mask</h5><input type="text" id="static_subnet_mask"/><br/>';
+    		html +=  '<h5 class="inline-heading">Default Gateway</h5><input type="text" id="static_default_gateway"/><br/>';
+    		html += '<button id="static_submit" class="btn btn-success">Submit</button><button id="static_cancel" class="btn btn-danger">Cancel</button>';
+
+    		function static_ip_callback() {
+		    	let ip = $('#static_ip').val();
+		    	let subnet = $('#static_subnet_mask').val();
+		    	let gateway = $('#static_default_gateway').val();
+		    	self.static_ip(ip, subnet, gateway);
+		    	$('.clicked-node').click();
+    		}
+
+    		function static_ip_cancel() {
+    			//need to regenerate the context menu
+    			$('.clicked-node').click();//hacky workaround to get the context menu up again without an obj ref to model.
+    		}
+
+    		$('#context-menu').html(html);
+    		$('#static_submit').click(static_ip_callback);
+    		$('#static_cancel').click(static_ip_cancel);
+    	});
     }
-
-
 
 }
 
