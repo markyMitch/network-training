@@ -1,22 +1,29 @@
 <div>
-    <h5>Network Builder task two - Network Addresses</h5>
-    <p>Computers are a lot like houses - they have addresses which let us know where to find them.
-        What makes it more complicated is that there is more than one type of address that we use to describe computers.
-        This challenge will look at a couple of ways that we can identify individual computers.</p>
-    <p>Work through the tasks and complete the questions, which will reveal the flag needed to complete the challenge.</p>
+    <h5>Network Builder task two - IP Addressing</h5>
+    <p>Physical addresses are all very well for the local subnet, but if we want to communicate with computers all
+    over the world we are going to need an IP (Internet Protocol) Address. These are used across the internet to
+    identify computers and allow messages sent over the internet to get to where they need to go.</p>
     <br/>
-    <h5>Physical address</h5>
-    <p>Every network card on a computer has a physical address, also known as a MAC address. This address is unique to
-    that network interface and is used to talk to other computers within the local part of the network (known as
-    the subnet).</p>
+    <p>IP Addresses are made up of 4 numbers between 0 and 255 seperated by dots (.) - eg. '192.168.5.10'</p>
     <br/>
-    <form action="/task1" method="post" target="_blank">
-        <h6>Question 1: What is the MAC Address for the Ethernet interface on Bob's PC</h6>
-        <input type="text" name="q1"/><br/>
-        <h6>Question 2: Which company made the Ethernet interface on Bob's PC?</h6>
-        <input type="text" name="q2"/><br/>
-        <input type="submit"/>
-    </form>
+    <h5>Dynamic Host Configuration Protocol (DHCP)</h5>
+    <p>How do computers get an IP address? We could set a static (fixed) address but what about if we are using a
+    computer in a network? If everyone set their own address it would cause chaos and we could end up with all sorts
+    of problems. To solve this, we use DHCP to send out a request to the network for an IP adress. Any servers
+     listening will reply and assign us an IP address.</p>
+    <br/>
+
+    <h6>Task one: Set Bob's PC to use static IP addressing with the following info:</h6>
+    <p>IP address: 192.168.0.99, subnet mask:255.255.255.0, Default Gateway: 192.168.0.1</p>
+    <br/>
+    <h6>Task two: Obtain an IP address for Bob's Laptop via DHCP</h6>
+    <br/>
+    <p>Once you have completed the two tasks press the button below to check your work. A flag will be awarded if
+     Bob's PC and Bob's laptop have been configured correctly.</p>
+    <br/>
+    <button id="task-two-submit" class="btn btn-primary">Check Answers</button>
+    <h6 id="task-two-message"></h6>
+    <br/><br/>
 
 
 

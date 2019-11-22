@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 class Server(object):
 
@@ -43,6 +43,34 @@ class Server(object):
             else:
                 error_message = 'Error: please enter answers to all the qurstions!'
                 return render_template('results.html', text=error_message)
+
+        @app.route('/task2', methods=['POST'])
+        def task2():
+            message = ''
+            try:
+                r = request
+                # check if Bob's PC has correct IP address etc
+                pc = r.json['pc']
+                laptop = r.json['laptop']
+                if pc['ip'] != '192.168.0.99':
+                    message = 'Incorrect IP Address for Bob\'s PC'
+                elif pc['subnet_mask'] != '255.255.255.0':
+                    message = 'Incorrect Subnet Mask for Bob\'s PC'
+                elif pc['default_gateway'] != '192.168.0.1':
+                    message = 'Incorrect default gateway for Bob\'s PC'
+                elif pc['addressing_mode'] != 'static':
+                    message = 'Incorrect status for Bob\'s PC'
+                elif laptop['addressing_mode'] != 'dhcp':
+                    message = 'Bob\'s laptop not configured via DHCP'
+                else:
+                    message = 'Congratulations! You passed! Have a flag: AhLEW6WuYm'
+
+            except AttributeError as e:
+                print(e)
+                message = 'Incorrect configuration: make sure you have addresses configured for the PC and laptop and try again'
+            finally:
+                return jsonify({'message': message})
+
 
 
         app.run()

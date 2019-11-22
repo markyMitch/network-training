@@ -5,6 +5,7 @@ class NetworkNode {
     subnet_mask = null;
     default_gateway = null;
     neighbour = null;
+    addressing_mode = null;
     log = "";
 
     constructor(name, MAC) {
@@ -74,11 +75,9 @@ class NetworkNode {
     	this.ip = ip;
     	this.subnet_mask = subnet_mask;
     	this.default_gateway = default_gateway;
+    	this.addressing_mode = 'static';
     	this.write_info('Static IP updated');
     	this.load_log();
-
-
-    	//check subnet mask
     }
 
     check_ip(ip) {
@@ -128,14 +127,10 @@ class NetworkNode {
     		this.ip = content[0];
     		this.subnet_mask = content[1];
     		this.default_gateway = content[2];
+    		this.addressing_mode = 'dhcp';
     		this.write_info('DHCP Lease Renewed \n');
     	}
     }
-
-    route_packet(destination) {
-    	//if 
-    }
-
 
     write_info(text) {
     	let date = new Date();
@@ -200,11 +195,21 @@ class NetworkNode {
     	});
     }
 
+    serialise() {
+    	var obj = null;
+    	if(this.neighbour) {
+    		obj = {'ip': this.ip, 'subnet_mask': this.subnet_mask, 'default_gateway': this.default_gateway, 'MAC': this.MAC, 'neighbour': this.neighbour.name, 'addressing_mode': this.addressing_mode};
+    	} else {
+    		obj = {'ip': this.ip, 'subnet_mask': this.subnet_mask, 'default_gateway': this.default_gateway, 'MAC': this.MAC, 'neighbour': null, 'addressing_mode': this.addressing_mode};
+    	}
+    	return obj;
+    	
+    }
+
 }
 
 class Desktop extends NetworkNode {
 	
-
 	constructor(name, MAC) {
 		super(name, MAC);
 		this.image = 'desktop.jpg';
@@ -468,4 +473,38 @@ function task_one() {
 	model.hook_nodes();
 	model.render_menu();
 }
+
+function task_two() {
+	model = new Model();
+	pc1 = new Desktop('Bob\'s PC', '00:00:0C:FD:B7:CA');
+	pc2 = new Desktop('Bob\'s Laptop', '00:00:0C:29:71:BB');
+	router = new Router('Bob\'s router', '25:DD:6B:4B:94:FB', '192.168.0.1', '255.255.255.0');
+	model.add_node(pc1);
+	model.add_node(pc2);
+	model.add_node(router);
+	model.render_nodes();
+	model.hook_nodes();
+	model.render_menu();
+	$('#task-two-submit').click(function() {
+		let pc1_json = pc1.serialise();
+		let pc2_json = pc2.serialise();
+		let obj = {'pc': pc1_json, 'laptop': pc2_json};
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", '/task2', true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(JSON.stringify(obj));
+		console.log('AJAX sent');
+
+		xhr.onload = function() {
+			let data = JSON.parse(this.responseText);
+			if(data && data.message) {
+				//print to DOM
+				$('#task-two-message').html(data.message);
+			} else {
+				//error
+			}
+		}
+	});
+}
+
 
