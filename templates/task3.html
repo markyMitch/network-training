@@ -1,0 +1,41 @@
+<div>
+    <h5>Network Builder task three - Subnets</h5>
+    <p>Earlier network builder tasks have mentioned subnets, but now it's time to look at them in a bit more detail.
+    Subnets represent 'neighbourhoods' of the internet a.k.a. sub-networks within a larger network. This allows us to
+         break down networks into smaller sections that are easier to manage.</p>
+    <h5>Default Gateways</h5>
+    <p>But how do we talk to things outside our subnet? That is where a Default Gateway comes in. This is a fancy
+     name for a router that can pass on messages for computers outside the subnet to the wider internet. It's important
+     that computers know the address of their default gateway, or they will not be able to send messages outside the
+     subnet.</p>
+    <h5>Subnet masks</h5>
+    <p>And how do we know how big the subnet is? That's where a subnet mask comes in. This looks a bit like an IP
+        address and tells us the relative size of the subnet. It's important that computers know this or they won't
+     be able to tell which addresses are within the subnet and which are on the wider network.</p>
+    <br/>
+    <h6>Task One: Configure Bob Ltd's new network.</h6>
+    <p>Bob has got himself a company - Bob Ltd! He has decided that his new company will need an IT network and has
+     asked you to set it up.</p>
+    <p>Bob has decided that he wants to keep the computer for the Finance department on a separate network to the rest
+     of his employees to keep the company's profits under wraps. He has even bought the Finance department a separate
+     router so that they can have their own subnet.</p>
+    <p>Unfortunately, there have been problems using DHCP on the network, so you are going to need to configure
+     Bob Ltd's PCs via static IP addresses. Bob has configured the following subnets:</p>
+    <h6>Employees: 192.168.0.0-192.168.0.255</h6>
+    <h6>Finances: 192.168.1.0-192.168.1.127</h6>
+    <br/>
+    <ol>
+        <li>Connect the Employee PC's to the Employee Router and the Finance PC to the Finance Router.</li>
+        <li>Connect the two routers together so that they can pass messages</li>
+        <li>Configure the Employee PC to use an IP address within the Employees subnet and to use the Employee Router
+             as the Default Gateway. Set the correct subnet mask for the size of the Employees subnet.</li>
+        <li>Configure the Finance PC to use an IP address within the Finances subnet and to use the Finances Router
+             as the Default Gateway. Set the correct subnet mask for the size of the Finance subnet.</li>
+    </ol>
+    <button id="task-three-submit" class="btn btn-primary">Check Configuration</button>
+    <h6 id="task-three-message"></h6>
+    <br/><br/>
+
+
+
+</div>

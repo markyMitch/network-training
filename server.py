@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 
+
 class Server(object):
 
     def run(self):
@@ -21,7 +22,7 @@ class Server(object):
                 q2 = request.form['q2']
 
                 q1_answers = ['00:00:0C:FD:B7:CA', '00000CFDB7CA']
-                q2_answers = ['CISCO', 'CISCO SYSTEMS','CISCO SYSTEMS INC', 'CISCO SYSTEMS, INC']
+                q2_answers = ['CISCO', 'CISCO SYSTEMS', 'CISCO SYSTEMS INC', 'CISCO SYSTEMS, INC']
 
                 q1_true = False
                 q2_true = False
@@ -71,9 +72,75 @@ class Server(object):
             finally:
                 return jsonify({'message': message})
 
+        @app.route('/task3', methods=['POST'])
+        def task3():
+            message = ''
+            # check employee pc
+            try:
+                r = request
+                employee_pc = r.json['employee_pc']
+                employee_router = r.json['employee_router']
+                finance_pc = r.json['finance_pc']
+                finance_router = r.json['finance_router']
 
+                employee_ip = employee_pc['ip']
+                employee_ip_parts = employee_ip.split('.')
+                if (len(employee_ip_parts) != 4 or employee_ip_parts[0] != '192' or employee_ip_parts[1] != '168'
+                        or employee_ip_parts[2] != '0'):
+                    message = 'Incorrect IP for Employee PC'
+                    raise ValueError
+                employee_ip_segment = int(employee_ip_parts[3])
+                if(employee_ip_segment < 0 or employee_ip_segment > 255 or employee_ip_segment == 1):
+                    message = 'Incorrect IP for Employee PC'
+                    raise ValueError
+                if employee_pc['subnet_mask'] != '255.255.255.0':
+                    message = 'Incorrect subnet mask for Employee PC'
+                    raise ValueError
+                if employee_pc['default_gateway'] != '192.168.0.1':
+                    message = 'Incorrect default gateway for Employee PC'
+                    raise ValueError
+
+                finance_ip = finance_pc['ip']
+                finance_ip_parts = finance_ip.split('.')
+                if (len(finance_ip_parts) != 4 or finance_ip_parts[0] != '192' or finance_ip_parts[1] != '168'
+                        or finance_ip_parts[2] != '1'):
+                    message = 'Incorrect IP for Finance PC'
+                    raise ValueError
+                finance_ip_segment = int(finance_ip_parts[3])
+                if (finance_ip_segment < 0 or finance_ip_segment > 127 or finance_ip_segment == 1):
+                    message = 'Incorrect IP for Finance PC'
+                    raise ValueError
+                if finance_pc['subnet_mask'] != '255.255.255.128':
+                    message = 'Incorrect subnet mask for Finance PC'
+                    raise ValueError
+                if finance_pc['default_gateway'] != '192.168.1.1':
+                    message = 'Incorrect default gateway for Finance PC'
+                    raise ValueError
+
+                if not('Employee PC' in employee_router['names']):
+                    message = 'Error: you have not connected up the network as instructed'
+                    raise ValueError
+                if not('Finance PC' in finance_router['names']):
+                    message = 'Error: you have not connected up the network as instructed'
+                    raise ValueError
+                if not ('Finance Router' in employee_router['names']):
+                    message = 'Error: you have not connected up the network as instructed'
+                    raise ValueError
+                message = 'Congratulations! You passed! Have a flag: XMix8ZZGpX'
+
+
+
+
+            except AttributeError as e:
+                print(e)
+                message = 'Incorrect configuration: make sure you have addresses configured for both PCs and try again'
+            except ValueError:
+                pass
+            finally:
+                return jsonify({'message': message})
 
         app.run()
+
 
 serv = Server()
 serv.run()

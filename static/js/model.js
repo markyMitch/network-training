@@ -217,6 +217,58 @@ class Desktop extends NetworkNode {
 
 }
 
+class Corporate_Desktop extends Desktop { //Desktop without the option to use DHCP.
+
+	constructor(name, MAC) {
+		super(name, MAC);
+	}
+
+	generate_menu() {
+    	let html = ""; 
+
+    	//provide buttons for available actions
+    	html += "<h3>Available commands:</h3>"
+    	html += "<button id='ipconfig-button' class='btn btn-primary' type='button'>IP Config</button><br/>";
+    	html += "<button id='static-button' class='btn btn-primary' type='button'>Set static IP</button><br/>";
+    	return html;
+    }
+
+    hook_menu() {
+    	//hook own generated menu buttons
+    	let self = this; //obj reference for in callback
+    	$('#ipconfig-button').click(function() {
+    		self.write_info(self.ipconfig());
+    		self.load_log();
+    	});
+    	$('#static-button').click(function() {
+    		let html = '<h5>Set static IP Adressing</h5><h5 class="inline-heading">IP Address</h5><input type="text" id="static_ip"/><br/>';
+    		html += '<h5 class="inline-heading">Subnet Mask</h5><input type="text" id="static_subnet_mask"/><br/>';
+    		html +=  '<h5 class="inline-heading">Default Gateway</h5><input type="text" id="static_default_gateway"/><br/>';
+    		html += '<button id="static_submit" class="btn btn-success">Submit</button><button id="static_cancel" class="btn btn-danger">Cancel</button>';
+
+    		function static_ip_callback() {
+		    	let ip = $('#static_ip').val();
+		    	let subnet = $('#static_subnet_mask').val();
+		    	let gateway = $('#static_default_gateway').val();
+		    	self.static_ip(ip, subnet, gateway);
+		    	$('.clicked-node').click();
+    		}
+
+    		function static_ip_cancel() {
+    			//need to regenerate the context menu
+    			$('.clicked-node').click();//hacky workaround to get the context menu up again without an obj ref to model.
+    		}
+
+    		$('#context-menu').html(html);
+    		$('#static_submit').click(static_ip_callback);
+    		$('#static_cancel').click(static_ip_cancel);
+    	});
+    }
+
+
+
+}
+
 class Router extends NetworkNode {
 	dhcp_start = null;
 	dhcp_end = null;
@@ -233,6 +285,7 @@ class Router extends NetworkNode {
 		let last = parts[3];
 		this.dhcp_start = parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + (parseInt(parts[3]) + 10);
 		this.dhcp_end = parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + (parseInt(parts[3]) + 50);
+		this.default_gateway = this.ip;
 	}
 
 	connect(node) {
@@ -258,6 +311,15 @@ class Router extends NetworkNode {
 			this.write_info("Not connected to " + node.name);
 		}
 		
+	}
+
+	serialise() {
+		let names = []
+		for(let i=0; i< this.neighbours.length; i++) {
+			names.push(this.neighbours[i].name);
+		}
+		let obj = {'names': names};
+		return obj;
 	}
 
 
@@ -500,6 +562,43 @@ function task_two() {
 			if(data && data.message) {
 				//print to DOM
 				$('#task-two-message').html(data.message);
+			} else {
+				//error
+			}
+		}
+	});
+}
+
+function task_three() {
+	model = new Model();
+	employee_pc = new Corporate_Desktop('Employee PC', '00:00:0C:FD:B7:CA');
+	employee_router = new Router('Employee Router', '25:DD:6B:4B:94:FB', '192.168.0.1', '255.255.255.0');
+	finance_pc = new Corporate_Desktop('Finance PC', '00:00:0C:EE:93:F6');
+	finance_router = new Router('Finance Router', '00:00:0C:D4:4C:A1', '192.168.1.1', '255.255.255.128');
+	model.add_node(employee_pc);
+	model.add_node(finance_pc);
+	model.add_node(employee_router);
+	model.add_node(finance_router);
+	model.render_nodes();
+	model.hook_nodes();
+	model.render_menu();
+	$('#task-three-submit').click(function() {
+		let employee_json = employee_pc.serialise();
+		let finance_json = finance_pc.serialise();
+		let employee_router_json = employee_router.serialise();
+		let finance_router_json = finance_router.serialise();
+		let obj = {'employee_pc': employee_json, 'finance_pc': finance_json, 'employee_router': employee_router_json, 'finance_router': finance_router_json};
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", '/task3', true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(JSON.stringify(obj));
+		console.log('AJAX sent');
+
+		xhr.onload = function() {
+			let data = JSON.parse(this.responseText);
+			if(data && data.message) {
+				//print to DOM
+				$('#task-three-message').html(data.message);
 			} else {
 				//error
 			}
