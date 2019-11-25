@@ -122,7 +122,7 @@ class NetworkNode {
 	}
 
     handle_message(message, sender, destination, content=null) {
-    	console.log('parent class handle message');
+    	
     	if(message == 'dhcp_info') {
     		this.ip = content[0];
     		this.subnet_mask = content[1];
@@ -264,8 +264,22 @@ class Corporate_Desktop extends Desktop { //Desktop without the option to use DH
     		$('#static_cancel').click(static_ip_cancel);
     	});
     }
+}
 
+class Internet extends Desktop {
+	constructor(name, MAC) {
+		super(name, MAC);
+		this.image = 'internet.png';
+	}
 
+	generate_menu() {
+		//do nothing
+		return '';
+	}
+
+	hook_menu() {
+		//do nothing
+	}
 
 }
 
@@ -303,7 +317,7 @@ class Router extends NetworkNode {
 		let index = this.neighbours.indexOf(node);
 		if(index != -1) {
 			//currently connected
-			console.log('Disconnecting node at ' + index);
+			
 			this.neighbours.splice(index, 1);
 			
 			this.write_info("Disconnected from " + node.name);
@@ -325,7 +339,7 @@ class Router extends NetworkNode {
 
 
 	handle_message(message, sender, destination, content=null) {
-		console.log(message);
+		
 		if(message == 'renew_dhcp') {
 			
 			let parts = this.dhcp_start.split('.');
@@ -371,6 +385,103 @@ class Router extends NetworkNode {
     	});
     	
     }
+}
+
+class Firewall extends Router {
+	
+	whitelist = [];
+
+
+	constructor(name, MAC, ip, subnet_mask) {
+		super(name, MAC, ip, subnet_mask);
+		this.image = 'firewall.png';
+	}
+
+	generate_menu() {
+    	let html = ""; 
+
+    	//display whitelisted ports
+    	html += "<h5>Whitelisted ports:</h5><p>";
+
+    	for(let i = 0; i < this.whitelist.length; i++) {
+    		if(i < this.whitelist.length -1) {
+    			html += (this.whitelist[i] + ", ");
+    		} else {
+    			html += this.whitelist[i];
+    		}
+    		
+    	}
+    	html += "</p>"
+
+    	//provide buttons for available actions
+    	html += "<h3>Available commands:</h3>"
+    	html += "<button id='ipconfig-button' class='btn btn-primary' type='button'>IP Config</button><br/>";
+    	html += "<h5 class='inline-heading'>Add port to whitelist: </h5><input id='port-add' type='text'/><button id='add-port-button' class='btn btn-primary'>Add</button><br>"
+    	html += "<h5 class='inline-heading'>Remove port from whitelist: </h5><input id='port-remove' type='text'/><button id='remove-port-button' class='btn btn-primary'>Remove</button>"
+    	
+    	return html;
+    }
+
+    hook_menu() {
+    	//hook own generated menu buttons
+    	let self = this; //obj reference for in callback
+    	$('#ipconfig-button').click(function() {
+    		self.write_info(self.ipconfig());
+    		self.load_log();
+    	});
+
+    	$('#add-port-button').click(function() {
+    		let port = parseInt($('#port-add').val());
+    		if(port && port != NaN && port > 0) {
+    			if(self.whitelist.indexOf(port) != -1) {
+    				self.write_info('Port ' + port + ' already in whitelist');
+	    			self.load_log();
+    			} else {
+    				self.whitelist.push(port);
+	    			self.write_info('Port ' + port + ' added to whitelist');
+	    			self.load_log();
+	    			$('.clicked-node').click();	
+    			}
+    			
+    		} else {
+    			self.write_info('Error: Port ' + port + ' is invalid.');
+    			self.load_log();
+    		}
+    	});
+
+    	$('#remove-port-button').click(function() {
+    		let port = parseInt($('#port-remove').val());
+    		if(port && port != NaN && port > 0) {
+    			let index = self.whitelist.indexOf(port);
+    			if(index != -1) {
+    				self.whitelist.splice(index,1);
+    				self.write_info('Port ' + port + ' removed from whitelist');
+    				self.load_log();
+    				$('.clicked-node').click();
+    			} else {
+    				self.write_info('Error: Port ' + port + ' not in whitelist');
+    				self.load_log();
+    			}
+    		} else {
+    			self.write_info('Error: Port ' + port + ' is invalid.');
+    			self.load_log();
+    		}
+    	});
+    	
+    }
+
+    handle_message(message, sender, destination, content=null) {
+    	//OVERIDE just drop the packet
+    }
+
+    serialise() {
+    	obj = {'whitelist': this.whitelist, 'neighbour': this.neighbour};
+    	return obj;
+    }
+
+
+
+
 }
 
 class Model {
@@ -419,14 +530,14 @@ class Model {
 		let self = this; //so we can reference obj inside callbacks
 		//find the active node
 		let $clicked_node = $('.clicked-node');
-		console.log($clicked_node);
+		
 		if($clicked_node.length == 0) {
 			$('#context-menu').html("<h2>Click on a network node to interact with it</h2>");
 		} else {
 			let id = $clicked_node.attr('id');
 			if(id) {
 				let node = this.find_node(id);
-				console.log(id);
+				
 				if(node) {
 					node.load_log(); //load relevant log history
 					let menu = node.generate_menu(); //raw html string
@@ -444,7 +555,7 @@ class Model {
 			    	if(node.neighbours && node.neighbours.length > 0) { //if a router or similar
 			    		
 			    		for(var index in node.neighbours) {
-			    			console.log(node.neighbours[index].name);
+			    			
 			    			html += "<div><h5 class='inline-heading'>" + node.neighbours[index].name + "</h5><button class='btn btn-danger disconnect-button' type='button'>Disconnect</button></div>";
 			    		}
 			    	} else if(node.neighbour) {
@@ -493,10 +604,7 @@ class Model {
 			    	});
 
 
-			    	return;
-
-
-				
+			    	return;				
 				}
 			}
 		}
@@ -555,7 +663,7 @@ function task_two() {
 		xhr.open("POST", '/task2', true);
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.send(JSON.stringify(obj));
-		console.log('AJAX sent');
+		
 
 		xhr.onload = function() {
 			let data = JSON.parse(this.responseText);
@@ -592,8 +700,7 @@ function task_three() {
 		xhr.open("POST", '/task3', true);
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.send(JSON.stringify(obj));
-		console.log('AJAX sent');
-
+	
 		xhr.onload = function() {
 			let data = JSON.parse(this.responseText);
 			if(data && data.message) {
@@ -604,6 +711,22 @@ function task_three() {
 			}
 		}
 	});
+}
+
+function task_four() {
+	model = new Model();
+	pc = new Desktop('Bob\'s PC', '00:00:0C:FD:B7:CA');
+	router = new Router('Bob\'s Router', '25:DD:6B:4B:94:FB', '192.168.0.1', '255.255.255.0');
+	firewall = new Firewall('Firewall', '25:DD:6B:82:EC:FB', '192.168.0.0', '255.255.255.0');
+	internet = new Internet('Internet', ' ');
+
+	model.add_node(firewall);
+	model.add_node(pc);
+	model.add_node(router);
+	model.add_node(internet);
+	model.render_nodes();
+	model.hook_nodes();
+	model.render_menu();
 }
 
 
