@@ -127,13 +127,55 @@ class Server(object):
                     message = 'Error: you have not connected up the network as instructed'
                     raise ValueError
                 message = 'Congratulations! You passed! Have a flag: XMix8ZZGpX'
+            except AttributeError as e:
+                print(e)
+                message = 'Incorrect configuration: make sure you have the network configured try again'
+            except ValueError:
+                pass
+            finally:
+                return jsonify({'message': message})
 
+        @app.route('/task4', methods=['POST'])
+        def task4():
+            message = ''
 
+            try:
+                r = request
+                pc = r.json['pc']
+                router = r.json['router']
+                firewall = r.json['firewall']
 
+                if not('Management PC' in router['names']):
+                    message = 'Error: Network configured incorrectly'
+                    raise ValueError
+                if not('Firewall' in router['names']):
+                    message = 'Error: Network configured incorrectly'
+                    raise ValueError
+                if not('Internet' in firewall['names']):
+                    message = 'Error: Network configured incorrectly'
+                    raise ValueError
+                if pc['addressing_mode'] != 'dhcp':
+                    message = 'Error: Management PC not configured by DHCP'
+                    raise ValueError
+
+                # check firewall ports
+                correct_ports = [22, 53, 80, 123, 443]
+
+                ports = firewall['whitelist']
+                port = ports.sort()
+
+                if len(ports) != len(correct_ports):
+                    message = 'Error: Wrong number of ports on firewall whitelist'
+                    raise ValueError
+
+                if ports != correct_ports:
+                    message = 'Error: Incorrect ports for firewall whitelist'
+                    raise ValueError
+                message = 'Congratulations! You passed! Have a flag: vCJ0BHCsI4'
 
             except AttributeError as e:
                 print(e)
-                message = 'Incorrect configuration: make sure you have addresses configured for both PCs and try again'
+                message = 'Incorrect configuration: make sure you have the network configured try again'
             except ValueError:
                 pass
             finally:

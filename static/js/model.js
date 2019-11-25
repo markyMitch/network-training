@@ -475,7 +475,13 @@ class Firewall extends Router {
     }
 
     serialise() {
-    	obj = {'whitelist': this.whitelist, 'neighbour': this.neighbour};
+    	let names = [];
+
+    	for(let i = 0; i < this.neighbours.length; i++) {
+    		names.push(this.neighbours[i].name);
+    	}
+
+    	let obj = {'whitelist': this.whitelist, 'names': names};
     	return obj;
     }
 
@@ -715,8 +721,8 @@ function task_three() {
 
 function task_four() {
 	model = new Model();
-	pc = new Desktop('Bob\'s PC', '00:00:0C:FD:B7:CA');
-	router = new Router('Bob\'s Router', '25:DD:6B:4B:94:FB', '192.168.0.1', '255.255.255.0');
+	pc = new Desktop('Management PC', '00:00:0C:FD:B7:CA');
+	router = new Router('Management Router', '25:DD:6B:4B:94:FB', '192.168.0.1', '255.255.255.0');
 	firewall = new Firewall('Firewall', '25:DD:6B:82:EC:FB', '192.168.0.0', '255.255.255.0');
 	internet = new Internet('Internet', ' ');
 
@@ -727,6 +733,27 @@ function task_four() {
 	model.render_nodes();
 	model.hook_nodes();
 	model.render_menu();
+	$('#task-four-submit').click(function() {
+		let firewall_json = firewall.serialise();
+		let pc_json = pc.serialise();
+		let router_json = router.serialise();
+		
+		let obj = {'pc': pc_json, 'firewall': firewall_json, 'router': router_json};
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", '/task4', true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(JSON.stringify(obj));
+	
+		xhr.onload = function() {
+			let data = JSON.parse(this.responseText);
+			if(data && data.message) {
+				//print to DOM
+				$('#task-four-message').html(data.message);
+			} else {
+				//error
+			}
+		}
+	});
 }
 
 

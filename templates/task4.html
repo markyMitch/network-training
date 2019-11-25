@@ -1,0 +1,43 @@
+<div>
+    <h5>Network Builder task four - Firewalls</h5>
+    <p>Bob is starting to get his head around Networks and now that the Bob Ltd network is up and running he has
+    something very important on his mind - security!</p>
+    <p>He has decided that he wants to invest in a firewall for Bob Ltd's Management network so that his high-flying
+     managers will be safe from cyber attacks.</p>
+    <h5>Ports</h5>
+    <p>Computers receive all sorts of messages over the network when they are running - whether it be from websites,
+    emails, video games or something else entirely. To make sure all the messages go to the right place, computers
+    use different numbered Ports to receive different kinds of messages. For example, to send an email via the
+    Simple Mail Transport Protocol, I would use port 25.</p>
+    <h5>Firewalls</h5>
+    <p>Firewalls are network devices that monitor internet traffic and only let messages past if they are on a list
+     of approved ports called a whitelist (this is a slight simplification). This makes sure that important messages
+     can still get around the network but helps to stop dangerous messages sent by cyber-criminals.</p>
+
+    <br/>
+    <h6>Task One: Add a firewall to Bob Ltd's Management network</h6>
+    <p>Bob would like you to connect the firewall so that all traffic from the internet is filtered by the firewall
+    before it reaches the rest of the network.</p>
+    <p>Bob Ltd's management team still need to be able to use common web services so the standard ports for these
+    message protocols need to be whitelisted:</p>
+    <ul>
+        <li>Non-secure web browsing (HTTP)</li>
+        <li>Secure web browsing (HTTPS)</li>
+        <li>The Domain Name Service (DNS)</li>
+        <li>Secure shell protocol (SSH)</li>
+        <li>Network time protocol (NTP)</li>
+    </ul>
+    <br/>
+    <h6>Stages to complete</h6>
+    <ol>
+        <li>Connect up Bob Ltd's management network so that all devices are connected together and traffic from the
+         internet is going through the Firewall before reaching any other devices.</li>
+        <li>Configure the Management PC to have an IP Address via DHCP</li>
+        <li>Add the ports for the web services listed above to the Firewall's whitelist so that the management team
+         can still access those services.Make sure the whitelist contains ONLY those ports.</li>
+    </ol>
+    <button id="task-four-submit" class="btn btn-primary">Check Configuration</button>
+    <h6 id="task-four-message"></h6>
+    <br/><br/>
+
+</div>
