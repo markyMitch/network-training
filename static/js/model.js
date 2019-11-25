@@ -48,7 +48,7 @@ class NetworkNode {
     	if(this.neighbour) {
     		this.write_info('Sending DHCP Request over network');
     		this.load_log();
-    		this.neighbour.handle_message('renew_dhcp', this.MAC, '', null); //not getting sent to router
+    		this.neighbour.handle_message('renew_dhcp', this.MAC, '', null); 
     	} else {
     		this.write_info('Error: need to be connected to a network to send DHCP request');
     		this.load_log();
